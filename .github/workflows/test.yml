@@ -11,37 +11,26 @@ env:
 
 jobs:
   test:
-    name: Test with ${{ matrix.engine }} / Nextflow ${{ matrix.nextflow }}
+    name: Test Nextflow ${{ matrix.nextflow_version }} with ${{ matrix.profile }}
     runs-on: ubuntu-latest
 
     strategy:
-      fail-fast: false
       matrix:
-        engine: [docker, apptainer]
-        nextflow: ['22.10.0', '23.10.0']
+        nextflow_version: ['22.10.6', '23.04.1']   # добавь нужные версии
+        profile: ['apptainer', 'docker']
 
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
 
-      - name: Install Java
-        uses: actions/setup-java@v3
+      - name: Install Nextflow
+        uses: nf-core/setup-nextflow@v2
         with:
-          distribution: 'temurin'
-          java-version: '11'
+          version: ${{ matrix.nextflow_version }}
 
-      - name: Install Nextflow ${{ matrix.nextflow }}
-        run: |
-          curl -s https://get.nextflow.io | bash
-          chmod +x nextflow
-          sudo mv nextflow /usr/local/bin/
-          nextflow self-update ${{ matrix.nextflow }}
-          nextflow -version
-
-      - name: Install Apptainer (only if needed)
-        if: matrix.engine == 'apptainer'
+      - name: Setup Apptainer (если выбран профиль apptainer)
+        if: matrix.profile == 'apptainer'
         uses: eWaterCycle/setup-apptainer@main
 
-      - name: Run Nextflow with ${{ matrix.engine }}
-        run: |
-          nextflow run main.nf -profile ${{ matrix.engine }}
+      - name: Run Nextflow pipeline
+        run: nextflow run main.nf -profile ${{ matrix.profile }}
