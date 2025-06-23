@@ -4,6 +4,11 @@ on:
   push:
   pull_request:
 
+env:
+  NXF_ANSI_LOG: false
+  NXF_SINGULARITY_CACHEDIR: ${{ github.workspace }}/.singularity
+  NXF_SINGULARITY_LIBRARYDIR: ${{ github.workspace }}/.singularity
+
 jobs:
   test-apptainer:
     name: Test with Apptainer
@@ -13,34 +18,11 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@v4
 
-      - name: Set up Java
-        uses: actions/setup-java@v3
-        with:
-          distribution: 'temurin'
-          java-version: '11'
-
       - name: Install Nextflow
-        run: |
-          curl -s https://get.nextflow.io | bash
-          sudo mv nextflow /usr/local/bin/
+        uses: nf-core/setup-nextflow@v2
 
       - name: Install Apptainer
-        run: |
-          sudo apt-get update && sudo apt-get install -y \
-            build-essential \
-            libseccomp-dev \
-            pkg-config \
-            squashfs-tools \
-            cryptsetup \
-            fuse-overlayfs \
-            uidmap \
-            git \
-            wget \
-            gnupg \
-            fakeroot \
-            fuse3
-          wget https://github.com/apptainer/apptainer/releases/download/v1.3.0/apptainer_1.3.0_amd64.deb
-          sudo dpkg -i apptainer_1.3.0_amd64.deb
+        uses: eWaterCycle/setup-apptainer@main
 
       - name: Run Nextflow with apptainer
         run: nextflow run main.nf -profile apptainer
