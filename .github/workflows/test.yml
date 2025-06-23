@@ -16,8 +16,8 @@ jobs:
 
     strategy:
       matrix:
-        nextflow_version: ['25.04.4', '24.04.1']   # добавь нужные версии
-        profile: ['apptainer', 'docker']
+        nextflow_version: ['25.04.4', 'latest-everything']
+        profile: ['apptainer', 'docker', 'conda']
 
     steps:
       - name: Checkout repo
@@ -31,6 +31,21 @@ jobs:
       - name: Setup Apptainer (если выбран профиль apptainer)
         if: matrix.profile == 'apptainer'
         uses: eWaterCycle/setup-apptainer@main
+    
+      - name: Set up Miniconda
+        if: matrix.profile == 'conda'
+        uses: conda-incubator/setup-miniconda@a4260408e20b96e80095f42ff7f1a15b27dd94ca # v3
+        with:
+          miniconda-version: "latest"
+          auto-update-conda: true
+          conda-solver: libmamba
+          channels: conda-forge,bioconda
+
+      - name: Set up Conda
+        if: matrix.profile == 'conda'
+        run: |
+          echo $(realpath $CONDA)/condabin >> $GITHUB_PATH
+          echo $(realpath python) >> $GITHUB_PATH
 
       - name: Run Nextflow pipeline
         run: nextflow run main.nf -profile ${{ matrix.profile }}

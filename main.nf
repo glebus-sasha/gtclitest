@@ -4,6 +4,7 @@ params.outdir = "results"
 
 process fastqc {
     container 'quay.io/biocontainers/fastqc:0.11.9--0'
+    conda 'bioconda::fastqc=0.11.9'
 
     input:
     path reads
@@ -22,6 +23,7 @@ process fastqc {
 process multiqc {
     container 'quay.io/biocontainers/multiqc:1.14--pyhdfd78af_0'
     publishDir "${params.outdir}", mode: 'copy', pattern: "multiqc_report.html"
+    conda 'bioconda::multiqc=1.14'
 
     input:
     path fastqc_results
