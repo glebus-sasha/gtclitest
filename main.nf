@@ -21,7 +21,8 @@ process fastqc {
 
 process multiqc {
     container 'quay.io/biocontainers/multiqc:1.14--pyhdfd78af_0'
-    
+    publishDir "${params.outdir}", mode: 'copy', pattern: "multiqc_report.html"
+
     input:
     path fastqc_results
 
@@ -36,7 +37,7 @@ process multiqc {
 }
 
 workflow {
-    reads = Channel.fromPath('https://raw.githubusercontent.com/nextflow-io/training/master/data/fastq/ERR458493_1.fastq.gz')
+    reads = Channel.fromPath('https://raw.githubusercontent.com/nf-core/test-datasets/sarek/testdata/manta/normal/C097F_N_111207.1.AGTTGCTT_R1_xxx.fastq.gz')
     fastqc(reads)
-    multiqc(fastqc.out.collect())
+    multiqc(fastqc.out[1])
 }
