@@ -12,7 +12,7 @@ env:
 jobs:
   test:
     name: Test Nextflow ${{ matrix.nextflow_version }} with ${{ matrix.profile }}
-    runs-on: ['ubuntu-latest', 'macOS']
+    runs-on: ['ubuntu-latest', 'macos-latest']
 
     strategy:
       matrix:
