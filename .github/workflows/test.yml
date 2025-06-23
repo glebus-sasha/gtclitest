@@ -10,33 +10,38 @@ env:
   NXF_SINGULARITY_LIBRARYDIR: ${{ github.workspace }}/.singularity
 
 jobs:
-  test-apptainer:
-    name: Test with Apptainer
+  test:
+    name: Test with ${{ matrix.engine }} / Nextflow ${{ matrix.nextflow }}
     runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        engine: [docker, apptainer]
+        nextflow: ['22.10.0', '23.10.0']
 
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
 
-      - name: Install Nextflow
-        uses: nf-core/setup-nextflow@v2
+      - name: Install Java
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '11'
 
-      - name: Install Apptainer
+      - name: Install Nextflow ${{ matrix.nextflow }}
+        run: |
+          curl -s https://get.nextflow.io | bash
+          chmod +x nextflow
+          sudo mv nextflow /usr/local/bin/
+          nextflow self-update ${{ matrix.nextflow }}
+          nextflow -version
+
+      - name: Install Apptainer (only if needed)
+        if: matrix.engine == 'apptainer'
         uses: eWaterCycle/setup-apptainer@main
 
-      - name: Run Nextflow with apptainer
-        run: nextflow run main.nf -profile apptainer
-
-  test-docker:
-    name: Test with Docker
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout repo
-        uses: actions/checkout@v4
-
-      - name: Install Nextflow
-        uses: nf-core/setup-nextflow@v2
-
-      - name: Run Nextflow with docker
-        run: nextflow run main.nf -profile docker
+      - name: Run Nextflow with ${{ matrix.engine }}
+        run: |
+          nextflow run main.nf -profile ${{ matrix.engine }}
