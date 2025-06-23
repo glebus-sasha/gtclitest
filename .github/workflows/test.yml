@@ -16,7 +16,7 @@ jobs:
 
     strategy:
       matrix:
-        nextflow_version: ['22.10.6', '23.04.1']   # добавь нужные версии
+        nextflow_version: ['25.04.4', '24.04.1']   # добавь нужные версии
         profile: ['apptainer', 'docker']
 
     steps:
